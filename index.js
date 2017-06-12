@@ -1,3 +1,6 @@
+const Botkit = require('botkit');
+const os = require('os');
+
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
   process.exit(1);
@@ -5,14 +8,11 @@ if (!process.env.token) {
 
 const teams = ['product', 'businness', 'communcations', 'customer success', 'people', 'finance', 'management'];
 
-var Botkit = require('botkit');
-var os = require('os');
-
-var controller = Botkit.slackbot({
+const controller = Botkit.slackbot({
   debug: true,
 });
 
-var bot = controller.spawn({
+const bot = controller.spawn({
   token: process.env.token
 }).startRTM();
 
@@ -85,7 +85,7 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
       }
 
       convo.on('end', function(convo) {
-        if (convo.status == 'completed') {
+        if (convo.status === 'completed') {
           bot.reply(message, 'Thank you!')
         } else {
           // this happens if the conversation ended prematurely for some reason
