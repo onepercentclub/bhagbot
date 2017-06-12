@@ -1,15 +1,15 @@
 const Botkit = require('botkit');
 const currentWeekNumber = require('current-week-number');
 const mongoStorage = require('botkit-storage-mongo')({
-  mongoUri: process.env.mongouri,
+  mongoUri: process.env.MONGO_URL,
 });
 
-if (!process.env.token) {
+if (!process.env.TOKEN) {
   console.log('Error: Specify token in environment');
   process.exit(1);
 }
 
-const teams = ['product', 'businness', 'communcations', 'customer success', 'people', 'finance', 'management'];
+const teams = ['product', 'businness', 'communications', 'customer success', 'people', 'finance', 'management'];
 
 const controller = Botkit.slackbot({
   debug: true,
@@ -17,7 +17,7 @@ const controller = Botkit.slackbot({
 });
 
 const bot = controller.spawn({
-  token: process.env.token
+  token: process.env.TOKEN,
 }).startRTM();
 
 controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
