@@ -35,7 +35,7 @@ module.exports = (bot, controller, influx) => {
     timestamp.setDate(last);
 
     controller.storage.users.all((err, users) => {
-      const points = users.filter((user) => Boolean(user.happiness[week])).map((user) => ({
+      const points = users.filter((user) => (user.happiness && Boolean(user.happiness[week]))).map((user) => ({
         measurement: 'ratings',
         fields: {
           score: user.happiness[week],

@@ -159,6 +159,35 @@ controller.hears(['what is my team'], 'direct_message,direct_mention,mention', (
   });
 });
 
+controller.hears(['i want to change teams'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.storage.users.get(message.user, (err, user) => {
+    bot.startConversation(message, (err, convo) => {
+      convo.ask('What is your new team?', (response, convo) => {
+        if (teams.indexOf(response.text.toLowerCase()) === -1) {
+          convo.say('Your team should be one of ' + teams.join(', '));
+          convo.repeat();
+          convo.next();
+        } else {
+          controller.storage.users.get(message.user, (err, user) => {
+            if (!user) {
+              user = {
+                id: message.user,
+              };
+            }
+            user.team = convo.extractResponse('team').toLowerCase();
+            controller.storage.users.save(user, (err, id) => {
+              bot.reply(message, 'Got it. You are in team ' + user.team + ' now.');
+            });
+          });
+          convo.next();
+        }
+      }, {
+        'key': 'team'
+      });
+    });
+  });
+});
+
 // Cryptocurrencies
 
 controller.hears(['(dogecoin|ether|stratis)'], 'direct_message,direct_mention,mention', (bot, message) => {
