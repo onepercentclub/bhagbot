@@ -1,5 +1,8 @@
 const Botkit = require('botkit');
-const os = require('os');
+const currentWeekNumber = require('current-week-number');
+const mongoStorage = require('botkit-storage-mongo')({
+  mongoUri: process.env.mongouri,
+});
 
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
@@ -10,6 +13,7 @@ const teams = ['product', 'businness', 'communcations', 'customer success', 'peo
 
 const controller = Botkit.slackbot({
   debug: true,
+  storage: mongoStorage,
 });
 
 const bot = controller.spawn({
@@ -33,7 +37,8 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
 
       function askForHappiness(convo) {
         convo.ask('How are you feeling today?', function(response, convo) {
-          if (!parseFloat(response.text)) {
+          const happiness = parseFloat(response.text);
+          if (!happiness || (happiness < 1) || (happiness > 10)) {
             convo.say('Please submit a valid number');
             convo.repeat();
           } else {
@@ -43,16 +48,23 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
                   id: message.user,
                 };
               }
-              user.happiness = convo.extractResponse('happiness');
+
+              const week = currentWeekNumber();
+
+              if (!user.happiness) {
+                user.happiness = {};
+              }
+              user.happiness[week] = happiness;
+
               controller.storage.users.save(user, function(err, id) {
-                bot.reply(message, 'Your happiness is ' + user.happiness + '.');
+                bot.reply(message, 'Your happiness is ' + user.happiness[week] + '.');
               });
             });
           }
           convo.next();
         }, {
           'key': 'happiness'
-        }); // store the results in a field called team
+        });
       }
 
       if (!user || !user.team) {
@@ -79,7 +91,7 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
           }
         }, {
           'key': 'team'
-        }); // store the results in a field called team
+        });
       } else {
         askForHappiness(convo);
       }
@@ -88,10 +100,23 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
         if (convo.status === 'completed') {
           bot.reply(message, 'Thank you!')
         } else {
-          // this happens if the conversation ended prematurely for some reason
           bot.reply(message, 'OK, nevermind!');
         }
       });
     });
+  });
+});
+
+controller.hears(['What is my happiness'], 'direct_message,direct_mention,mention', function(bot, message) {
+  const week = currentWeekNumber();
+
+  controller.storage.users.get(message.user, function(err, user) {
+    bot.reply(message, 'Your happiness this week is ' + user.happiness[week]);
+  });
+});
+
+controller.hears(['What is my team'], 'direct_message,direct_mention,mention', function(bot, message) {
+  controller.storage.users.get(message.user, function(err, user) {
+    bot.reply(message, 'Your team is ' + user.team);
   });
 });
