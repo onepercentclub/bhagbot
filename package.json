@@ -12,6 +12,7 @@
   "dependencies": {
     "botkit": "^0.5.4",
     "botkit-storage-mongo": "^1.0.6",
-    "current-week-number": "^1.0.7"
+    "current-week-number": "^1.0.7",
+    "node-schedule": "^1.2.3"
   }
 }

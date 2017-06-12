@@ -3,6 +3,8 @@ const currentWeekNumber = require('current-week-number');
 const mongoStorage = require('botkit-storage-mongo')({
   mongoUri: process.env.MONGO_URL,
 });
+const schedule = require('node-schedule');
+
 
 if (!process.env.TOKEN) {
   console.log('Error: Specify token in environment');
@@ -20,6 +22,77 @@ const bot = controller.spawn({
   token: process.env.TOKEN,
 }).startRTM();
 
+function askQuestions(convo, message, user) {
+  function askForHappiness(convo) {
+    convo.ask('How are you feeling today?', function(response, convo) {
+      const happiness = parseFloat(response.text);
+      if (!happiness || (happiness < 1) || (happiness > 10)) {
+        convo.say('Please submit a valid number');
+        convo.repeat();
+      } else {
+        controller.storage.users.get(message.user, function(err, user) {
+          if (!user) {
+            user = {
+              id: message.user,
+            };
+          }
+
+          const week = currentWeekNumber();
+
+          if (!user.happiness) {
+            user.happiness = {};
+          }
+          user.happiness[week] = happiness;
+
+          controller.storage.users.save(user, function(err, id) {
+            bot.reply(message, 'Your happiness is ' + user.happiness[week] + '.');
+          });
+        });
+      }
+      convo.next();
+    }, {
+      'key': 'happiness'
+    });
+  }
+
+  if (!user || !user.team) {
+    convo.ask('What is your team?', function(response, convo) {
+      if (teams.indexOf(response.text.toLowerCase()) === -1) {
+        convo.say('Your team should be one of ' + teams.join(', '));
+        convo.repeat();
+        convo.next();
+      } else {
+        controller.storage.users.get(message.user, function(err, user) {
+          if (!user) {
+            user = {
+              id: message.user,
+            };
+          }
+          user.team = convo.extractResponse('team');
+          controller.storage.users.save(user, function(err, id) {
+            bot.reply(message, 'Got it. You are in team ' + user.team + '.');
+          });
+        });
+
+        askForHappiness(convo);
+        convo.next();
+      }
+    }, {
+      'key': 'team'
+    });
+  } else {
+    askForHappiness(convo);
+  }
+
+  convo.on('end', function(convo) {
+    if (convo.status === 'completed') {
+      bot.reply(message, 'Thank you!')
+    } else {
+      bot.reply(message, 'OK, nevermind!');
+    }
+  });
+}
+
 controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
 
   bot.api.reactions.add({
@@ -34,75 +107,7 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
 
   controller.storage.users.get(message.user, function(err, user) {
     bot.startConversation(message, function(err, convo) {
-
-      function askForHappiness(convo) {
-        convo.ask('How are you feeling today?', function(response, convo) {
-          const happiness = parseFloat(response.text);
-          if (!happiness || (happiness < 1) || (happiness > 10)) {
-            convo.say('Please submit a valid number');
-            convo.repeat();
-          } else {
-            controller.storage.users.get(message.user, function(err, user) {
-              if (!user) {
-                user = {
-                  id: message.user,
-                };
-              }
-
-              const week = currentWeekNumber();
-
-              if (!user.happiness) {
-                user.happiness = {};
-              }
-              user.happiness[week] = happiness;
-
-              controller.storage.users.save(user, function(err, id) {
-                bot.reply(message, 'Your happiness is ' + user.happiness[week] + '.');
-              });
-            });
-          }
-          convo.next();
-        }, {
-          'key': 'happiness'
-        });
-      }
-
-      if (!user || !user.team) {
-        convo.ask('What is your team?', function(response, convo) {
-          if (teams.indexOf(response.text.toLowerCase()) === -1) {
-            convo.say('Your team should be one of ' + teams.join(', '));
-            convo.repeat();
-            convo.next();
-          } else {
-            controller.storage.users.get(message.user, function(err, user) {
-              if (!user) {
-                user = {
-                  id: message.user,
-                };
-              }
-              user.team = convo.extractResponse('team');
-              controller.storage.users.save(user, function(err, id) {
-                bot.reply(message, 'Got it. You are in team ' + user.team + '.');
-              });
-            });
-
-            askForHappiness(convo);
-            convo.next();
-          }
-        }, {
-          'key': 'team'
-        });
-      } else {
-        askForHappiness(convo);
-      }
-
-      convo.on('end', function(convo) {
-        if (convo.status === 'completed') {
-          bot.reply(message, 'Thank you!')
-        } else {
-          bot.reply(message, 'OK, nevermind!');
-        }
-      });
+      askQuestions(convo, message, user);
     });
   });
 });
@@ -118,5 +123,23 @@ controller.hears(['What is my happiness'], 'direct_message,direct_mention,mentio
 controller.hears(['What is my team'], 'direct_message,direct_mention,mention', function(bot, message) {
   controller.storage.users.get(message.user, function(err, user) {
     bot.reply(message, 'Your team is ' + user.team);
+  });
+});
+
+const rule = new schedule.RecurrenceRule();
+// rule.dayOfWeek = 5;
+rule.second = [5];
+
+const job = schedule.scheduleJob(rule, function() {
+  bot.api.channels.info({ channel: 'C5T1YSBK9' }, function(err,response) {
+    console.log(response.channel.members);
+
+    response.channel.members.map(userId => {
+      controller.storage.users.get(userId, function(err, user) {
+        bot.startPrivateConversation({ user: userId }, function(err, convo) {
+          askQuestions(convo, { channel: userId, user: userId }, user);
+        });
+      });
+    });
   });
 });
