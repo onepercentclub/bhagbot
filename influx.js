@@ -4,7 +4,7 @@ const database = process.env.ENVIRONMENT === 'production' ? '' : 'platform_v2_st
 
 module.exports = new Influx.InfluxDB({
   database,
-  host: 'localhost',
+  host: process.env.INFLUXDB_HOST,
   password: process.env.DB_PASS,
   username: 'admin',
   schema: [{
