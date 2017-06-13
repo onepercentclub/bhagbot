@@ -6,6 +6,7 @@ module.exports = new Influx.InfluxDB({
   database,
   host: process.env.INFLUXDB_HOST,
   password: process.env.DB_PASS,
+  port: process.env.INFLUXDB_PORT,
   username: 'admin',
   schema: [{
     measurement: 'ratings',
