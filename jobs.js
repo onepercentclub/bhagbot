@@ -4,7 +4,7 @@ const schedule = require('node-schedule');
 module.exports = (bot, controller, influx) => {
   const rule = new schedule.RecurrenceRule();
   rule.dayOfWeek = 5;
-  rule.hour = [1];
+  rule.hour = 11;
 
   schedule.scheduleJob(rule, () => {
     bot.api.channels.info({ channel: crewChannel }, (err,response) => {
@@ -19,7 +19,7 @@ module.exports = (bot, controller, influx) => {
   });
 
   const influxRule = new schedule.RecurrenceRule();
-  influxRule.second = [5];
+  influxRule.dayOfWeek = 7;
 
   schedule.scheduleJob(influxRule, () => {
     const week = currentWeekNumber();

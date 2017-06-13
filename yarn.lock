@@ -219,6 +219,10 @@ ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
+apiai@^2.0.5:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/apiai/-/apiai-2.0.7.tgz#bd87d89cf5cfc7dab1bf9e1181aee8978e780897"
+
 array-back@^1.0.3, array-back@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/array-back/-/array-back-1.0.4.tgz#644ba7f095f7ffcf7c43b5f0dc39d3c1f03c063b"
@@ -364,6 +368,13 @@ botbuilder@^3.7.0:
     rsa-pem-from-mod-exp "^0.8.4"
     sprintf-js "^1.0.3"
     url-join "^1.1.0"
+
+botkit-middleware-apiai@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/botkit-middleware-apiai/-/botkit-middleware-apiai-0.1.1.tgz#c61afe7d826c8448faf5c83d2853446c9559ace6"
+  dependencies:
+    apiai "^2.0.5"
+    node-uuid "^1.4.7"
 
 botkit-storage-mongo@^1.0.6:
   version "1.0.6"
@@ -1260,7 +1271,7 @@ node-schedule@^1.2.3:
     long-timeout "0.1.1"
     sorted-array-functions "^1.0.0"
 
-node-uuid@~1.4.3, node-uuid@~1.4.7:
+node-uuid@^1.4.7, node-uuid@~1.4.3, node-uuid@~1.4.7:
   version "1.4.8"
   resolved "https://registry.yarnpkg.com/node-uuid/-/node-uuid-1.4.8.tgz#b040eb0923968afabf8d32fb1f17f1167fdab907"
 

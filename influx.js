@@ -1,7 +1,9 @@
 const Influx = require('influx');
 
+const database = process.env.ENVIRONMENT === 'production' ? '' : 'platform_v2_staging';
+
 module.exports = new Influx.InfluxDB({
-  database: 'platform_v2_staging',
+  database,
   host: 'localhost',
   password: process.env.DB_PASS,
   username: 'admin',

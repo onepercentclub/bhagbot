@@ -1,4 +1,4 @@
-const { bot, controller } = require('./bot');
+const { apiai, bot, controller } = require('./bot');
 const currentWeekNumber = require('current-week-number');
 const fetch = require('node-fetch');
 const influx = require('./influx');
@@ -13,82 +13,18 @@ if (!process.env.TOKEN) {
 // Set up the scheduled jobs
 jobs(bot, controller, influx);
 
+bot.api.channels.list({}, (err, result) => {
+  console.log(result);
+})
+
 // General-use constants
-const crewChannel = 'C5T1YSBK9';
+const crewChannel = 'C4CF2GA91'; // C5T1YSBK9 for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
 const teams = ['product', 'sales', 'communications', 'customer success', 'operations'];
 
-const askQuestions = (convo, message, user) => {
-  const askForHappiness = (convo) => {
-    convo.ask('How are you feeling today?', (response, convo) => {
-      const happiness = parseFloat(response.text);
-      if (!happiness || (happiness < 1) || (happiness > 10)) {
-        convo.say('Please submit a number between 1 and 10.');
-        convo.repeat();
-      } else {
-        controller.storage.users.get(message.user, (err, user) => {
-          if (!user) {
-            user = {
-              id: message.user,
-            };
-          }
+// Conversations
 
-          const week = currentWeekNumber();
-
-          if (!user.happiness) {
-            user.happiness = {};
-          }
-          user.happiness[week] = happiness;
-
-          controller.storage.users.save(user, (err, id) => {
-            bot.reply(message, 'Your happiness is ' + user.happiness[week] + '.');
-          });
-        });
-      }
-      convo.next();
-    }, {
-      'key': 'happiness'
-    });
-  }
-
-  if (!user || !user.team) {
-    convo.ask('What is your team?', (response, convo) => {
-      if (teams.indexOf(response.text.toLowerCase()) === -1) {
-        convo.say('Your team should be one of ' + teams.join(', '));
-        convo.repeat();
-        convo.next();
-      } else {
-        controller.storage.users.get(message.user, (err, user) => {
-          if (!user) {
-            user = {
-              id: message.user,
-            };
-          }
-          user.team = convo.extractResponse('team').toLowerCase();
-          controller.storage.users.save(user, (err, id) => {
-            bot.reply(message, 'Got it. You are in team ' + user.team + '.');
-          });
-        });
-
-        askForHappiness(convo);
-        convo.next();
-      }
-    }, {
-      'key': 'team'
-    });
-  } else {
-    askForHappiness(convo);
-  }
-
-  convo.on('end', (convo) => {
-    if (convo.status === 'completed') {
-      bot.reply(message, 'Thank you!')
-    } else {
-      bot.reply(message, 'OK, nevermind!');
-    }
-  });
-}
-
-controller.hears(['h(ello|i|owdy)'], 'direct_message,direct_mention,mention', (bot, message) => {
+// Hi, Howdy, Hello, etc.
+controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -99,23 +35,99 @@ controller.hears(['h(ello|i|owdy)'], 'direct_message,direct_mention,mention', (b
     }
   });
 
+  bot.reply(message, message.fulfillment.speech); // Hi, how are you?
+});
+
+// Fine and you, I'm doing great, etc.
+controller.hears(['Welcome Response Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+  bot.reply(message, message.fulfillment.speech);
+});
+
+// My score is ...
+controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+  const score = message.entities.number;
+
+  if (!score || (score < 1) || (score > 10)) {
+    bot.reply('Please submit a number between 1 and 10.');
+  } else {
+    controller.storage.users.get(message.user, (err, user) => {
+      if (!user) {
+        user = {
+          id: message.user,
+        };
+      }
+
+      const week = currentWeekNumber();
+
+      if (!user.happiness) {
+        user.happiness = {};
+      }
+      user.happiness[week] = score;
+
+      controller.storage.users.save(user, (err, id) => {
+        const r = Math.floor(Math.random() * message.fulfillment.messages.length);
+        const reply = message.fulfillment.messages[r];
+
+        if (score > 6) {
+          bot.reply(message, reply.payload.high);
+        } else {
+          bot.reply(message, reply.payload.low);
+        }
+
+        if (!user.team) {
+          setTimeout(() => {
+            bot.reply(message, 'By the way, what is your team?');
+          }, 250);
+        }
+      });
+    });
+  }
+});
+
+// My team is ...
+controller.hears(['Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
-    bot.startConversation(message, (err, convo) => {
-      askQuestions(convo, message, user);
+    if (!user) {
+      user = {
+        id: message.user,
+      };
+    }
+    user.team = message.entities.team;
+    controller.storage.users.save(user, (err, id) => {
+      bot.reply(message, message.fulfillment.speech);
+    });
+  });
+});
+
+// I want to change team
+controller.hears(['Change Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+  bot.reply(message, message.fulfillment.speech);
+});
+
+controller.hears(['set.team'], '', apiai.actions, (bot, message) => {
+  controller.storage.users.get(message.user, (err, user) => {
+    if (!user) {
+      user = {
+        id: message.user,
+      };
+    }
+    user.team = message.entities.team;
+    controller.storage.users.save(user, (err, id) => {
+      bot.reply(message, message.fulfillment.speech);
     });
   });
 });
 
 // Happiness score
 
-controller.hears(['what is the average happiness score'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+  const team = message.entities.team;
+
   influx.query(`
-    select mean(score) from platform_v2_staging.autogen.ratings
-    where type = 'happiness'
-    group by department
+    select mean(score) from ratings
+    where type = 'happiness' ${team ? `and department='${team}'` : ''}
   `).then((result) => {
-    const str = result.map(r => r.department + ': ' + r.mean).join('\n');
-    bot.reply(message, str);
+    bot.reply(message, message.fulfillment.speech.replace('{}', result[0].mean));
   })
 });
 
@@ -142,12 +154,12 @@ controller.hears(['what is my happiness score'], 'direct_message,direct_mention,
 
 // Engagement number
 
-controller.hears(['what is the engagement number'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   influx.query(`
-    select sum(engagement_number) FROM platform_v2_staging.autogen.saas
+    select sum(engagement_number) from saas
     where type='engagement_number_aggregate'
   `).then((result) => {
-    bot.reply(message, String(result[0].sum));
+    bot.reply(message, message.fulfillment.speech.replace('{}', result[0].sum));
   });
 });
 
@@ -159,38 +171,9 @@ controller.hears(['what is my team'], 'direct_message,direct_mention,mention', (
   });
 });
 
-controller.hears(['i want to change teams'], 'direct_message,direct_mention,mention', (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
-    bot.startConversation(message, (err, convo) => {
-      convo.ask('What is your new team?', (response, convo) => {
-        if (teams.indexOf(response.text.toLowerCase()) === -1) {
-          convo.say('Your team should be one of ' + teams.join(', '));
-          convo.repeat();
-          convo.next();
-        } else {
-          controller.storage.users.get(message.user, (err, user) => {
-            if (!user) {
-              user = {
-                id: message.user,
-              };
-            }
-            user.team = convo.extractResponse('team').toLowerCase();
-            controller.storage.users.save(user, (err, id) => {
-              bot.reply(message, 'Got it. You are in team ' + user.team + ' now.');
-            });
-          });
-          convo.next();
-        }
-      }, {
-        'key': 'team'
-      });
-    });
-  });
-});
-
 // Cryptocurrencies
 
-controller.hears(['(dogecoin|ether|stratis)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_mention,mention', (bot, message) => {
   const match = message.match[1] === 'ether' ? 'ethereum' : message.match[1];
   fetch(`https://api.coinmarketcap.com/v1/ticker/${match}/?convert=EUR`)
     .then((result) => result.json())

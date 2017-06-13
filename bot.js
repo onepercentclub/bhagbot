@@ -1,18 +1,25 @@
-const Botkit = require('botkit');
+const botkit = require('botkit');
 const mongoStorage = require('botkit-storage-mongo')({
   mongoUri: process.env.MONGO_URL,
 });
+const apiai = require('botkit-middleware-apiai')({
+    token: process.env.APIAI_TOKEN,
+    skip_bot: true // or false. If true, the middleware don't send the bot reply/says to api.ai
+});
 
-const controller = Botkit.slackbot({
+const controller = botkit.slackbot({
   debug: true,
   storage: mongoStorage,
 });
+
+controller.middleware.receive.use(apiai.receive);
 
 const bot = controller.spawn({
   token: process.env.TOKEN,
 }).startRTM();
 
 module.exports = {
+  apiai,
   bot,
   controller,
 };
