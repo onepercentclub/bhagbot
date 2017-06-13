@@ -4,6 +4,8 @@ const fetch = require('node-fetch');
 const influx = require('./influx');
 const jobs = require('./jobs');
 
+console.log(apiai);
+
 // No token, no bot
 if (!process.env.TOKEN) {
   console.log('Error: Specify token in environment');
@@ -12,10 +14,6 @@ if (!process.env.TOKEN) {
 
 // Set up the scheduled jobs
 jobs(bot, controller, influx);
-
-bot.api.channels.list({}, (err, result) => {
-  console.log(result);
-})
 
 // General-use constants
 const crewChannel = 'C4CF2GA91'; // C5T1YSBK9 for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
