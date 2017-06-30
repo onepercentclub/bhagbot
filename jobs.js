@@ -78,7 +78,7 @@ const askQuestions = (convo, message, user) => {
 module.exports = (bot, controller, influx) => {
   const rule = new schedule.RecurrenceRule();
   rule.dayOfWeek = 5;
-  rule.hour = 11;
+  rule.hour = 12;
 
   schedule.scheduleJob(rule, () => {
     bot.api.channels.info({ channel: crewChannel }, (err,response) => {
