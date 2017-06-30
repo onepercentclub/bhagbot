@@ -76,11 +76,8 @@ const askQuestions = (convo, message, user) => {
 }
 
 module.exports = (bot, controller, influx) => {
-  const rule = new schedule.RecurrenceRule();
-  rule.dayOfWeek = 5;
-  rule.hour = 12;
-
-  schedule.scheduleJob(rule, () => {
+  // Ask question on Friday
+  schedule.scheduleJob({ dayOfWeek: 5, hour: 12, minute: 30 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err,response) => {
       response.channel.members.map(userId => {
         controller.storage.users.get(userId, (err, user) => {
@@ -92,10 +89,8 @@ module.exports = (bot, controller, influx) => {
     });
   });
 
-  const influxRule = new schedule.RecurrenceRule();
-  influxRule.dayOfWeek = 7;
-
-  schedule.scheduleJob(influxRule, () => {
+  // Sync with InFlux on Sunday
+  schedule.scheduleJob({ dayOfWeek: 0, hour: 0, minute: 0 }, () => {
     const week = currentWeekNumber();
 
     const timestamp = new Date; // get current date

@@ -19,5 +19,15 @@ module.exports = new Influx.InfluxDB({
       'username',
       'type',
     ],
-  }],
+  },
+  // {
+  //     measurement: 'resolution_score',
+  //     fields: {
+  //       success: Influx.FieldType.BOOLEAN,
+  //     },
+  //     tags: [
+  //       'username',
+  //     ],
+  //   }
+  ],
 });
