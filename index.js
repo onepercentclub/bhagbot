@@ -72,7 +72,7 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
           }, 250);
         }
 
-        bot.reply(message, 'Where you successfull in obtaining your Personal Resolution Score?');
+        bot.reply(message, 'Where you successfull in obtaining your Personal Smart Resolution?');
 
       });
     });
