@@ -71,6 +71,9 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
             bot.reply(message, 'By the way, what is your team?');
           }, 250);
         }
+
+        bot.reply(message, 'Where you successfull in obtaining your Personal Resolution Score?');
+
       });
     });
   }
@@ -121,6 +124,45 @@ controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mentio
   `).then((result) => {
     bot.reply(message, message.fulfillment.speech.replace('{}', result[0].mean));
   })
+});
+
+controller.hears(['what is my happiness score'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.storage.users.get(message.user, (err, user) => {
+    const week = currentWeekNumber();
+    const happiness = user.happiness[week];
+
+    if (happiness < 5) {
+      bot.reply(message,
+        `Ah bummer, your happiness this week was ${happiness}. Cheer up, every cloud has a silver lining!
+      `);
+    } else if (happiness < 7) {
+      bot.reply(message,
+        `Close to a 7, but there's room for improvement. Your happiness this week was ${happiness}
+      `);
+    } else {
+      bot.reply(message,
+        `That's what I'm talking about! With a happiness of ${happiness} this week, I'm sure that next week will be a good one as well!
+      `);
+    }
+  });
+});
+
+// Personal resolution score
+
+controller.hears(['yes, i have obtained my personal resolution score'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.storage.users.get(message.user, (err, user) => {
+    bot.reply(message,
+      `Wow, that's awesome, you are legen - wait for it - dairy!`
+    );
+  });
+});
+
+controller.hears(['nope, i have not obtained my personal resolution score'], 'direct_message,direct_mention,mention', (bot, message) => {
+  controller.storage.users.get(message.user, (err, user) => {
+    bot.reply(message,
+      `Bummer, here's some inspiriation: "_do or do not; there is no try_". Go get 'em tiger!`
+    );
+  });
 });
 
 controller.hears(['what is my happiness score'], 'direct_message,direct_mention,mention', (bot, message) => {
