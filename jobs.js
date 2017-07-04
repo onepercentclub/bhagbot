@@ -3,7 +3,7 @@ const schedule = require('node-schedule');
 
 const { bot, controller } = require('./bot');
 
-const crewChannel = 'C4CF2GA91'; // C4CF2GA91 for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
+const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
 const teams = ['product', 'sales', 'communications', 'customer success', 'operations'];
 
 const askQuestions = (convo, message, user) => {
