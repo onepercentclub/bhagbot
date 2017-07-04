@@ -3,8 +3,8 @@ const mongoStorage = require('botkit-storage-mongo')({
   mongoUri: process.env.MONGO_URL,
 });
 const apiai = require('botkit-middleware-apiai')({
-    token: process.env.APIAI_TOKEN,
-    skip_bot: true // or false. If true, the middleware don't send the bot reply/says to api.ai
+  token: process.env.APIAI_TOKEN,
+  skip_bot: true // or false. If true, the middleware don't send the bot reply/says to api.ai
 });
 
 const controller = botkit.slackbot({

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ."
+    "start": "nodemon ."
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
     "current-week-number": "^1.0.7",
     "influx": "next",
     "node-fetch": "^1.7.1",
-    "node-schedule": "^1.2.3"
+    "node-schedule": "^1.2.3",
+    "nodemon": "^1.11.0"
   }
 }
