@@ -6,13 +6,13 @@ const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for cr
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
   const friday = { dayOfWeek: 5, hour: 11, minute: 0 };
-  schedule.scheduleJob({ dayOfWeek: 3, hour: 12, minute: 01 }, () => {
+  schedule.scheduleJob({ dayOfWeek: 3, minute: 0 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err, { channel }) => {
       channel.members.map(userId => {
         bot.api.users.info({ user: userId }, (err, { user }) => {
           bot.say({
             channel: userId,
-            text: `Howdy ${user.profile.first_name}! How are you feeling this week?`,
+            text: `Howdy ${user.profile.first_name}!`,
           });
         });
       });
