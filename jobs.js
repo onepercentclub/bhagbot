@@ -1,24 +1,25 @@
 const currentWeekNumber = require('current-week-number');
 const schedule = require('node-schedule');
 
-const { apiai, bot, controller } = require('./bot');
-
 const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
 
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
-  const friday = { dayOfWeek: 5, hour: 9, minute: 0 };
-  schedule.scheduleJob({ hour: 10, minute: 0 }, () => {
+  const friday = { dayOfWeek: 5, hour: 11, minute: 0 };
+  schedule.scheduleJob({ dayOfWeek: 3, hour: 12, minute: 01 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err, { channel }) => {
       channel.members.map(userId => {
         bot.api.users.info({ user: userId }, (err, { user }) => {
-          bot.reply({ channel: userId }, `Howdy ${user.profile.first_name}! How are you feeling this week?`);
+          bot.say({
+            channel: userId,
+            text: `Howdy ${user.profile.first_name}! How are you feeling this week?`,
+          });
         });
       });
     });
   });
 
-  // Sync with InFlux on Sunday
+  // Sync with Influx on Sunday
   const sunday = { dayOfWeek: 0, hour: 0, minute: 0 };
   schedule.scheduleJob(sunday, () => {
     const week = currentWeekNumber();

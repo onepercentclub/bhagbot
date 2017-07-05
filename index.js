@@ -28,13 +28,18 @@ const teams = [
 // Conversations //
 ///////////////////
 
+// Basic flow:
+// Default Welcome Intent -> Welcome Response Intent -> Happiness Score Personal -> Team
+//                                                                               -> PSR Not Obtained
+//                                                                               -> PSR Obtained
+
 // Hi, Howdy, Hello, etc.
 controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   // Add the bhag emoji as reaction to the message of the sender
   bot.api.reactions.add({
-    timestamp: message.ts,
     channel: message.channel,
     name: 'bhag',
+    timestamp: message.ts,
   }, (err, res) => {
     if (err) {
       bot.botkit.log('Failed to add emoji reaction :(', err);
@@ -54,7 +59,7 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
   const score = message.entities.number;
 
   if (!score || (score < 1) || (score > 10)) {
-    bot.reply('Please submit a number between 1 and 10.');
+    bot.reply(message, 'Please submit a number between 1 and 10.');
   } else {
     controller.storage.users.get(message.user, (err, user) => {
       if (!user) {
@@ -80,14 +85,13 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
           bot.reply(message, reply.payload.low);
         }
 
-        if (!user.team) {
-          setTimeout(() => {
+        setTimeout(() => {
+          if (!user.team) {
             bot.reply(message, 'By the way, what is your team?');
-          }, 250);
-        }
-
-        bot.reply(message, 'Where you successfull in obtaining your Personal Smart Resolution?');
-
+          } else {
+            bot.reply(message, 'Where you successfull in obtaining your Personal Smart Resolution?');
+          }
+        }, 250);
       });
     });
   }
@@ -148,19 +152,15 @@ controller.hears(['what is my happiness score'], 'direct_message,direct_mention,
 });
 
 // Personal resolution score
-controller.hears(['yes, i have obtained my personal resolution score'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['PSR Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
-    bot.reply(message,
-      `Wow, that's awesome, you are legen - wait for it - dairy!`
-    );
+    bot.reply(message, message.fulfillment.speech);
   });
 });
 
-controller.hears(['nope, i have not obtained my personal resolution score'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
-    bot.reply(message,
-      `Bummer, here's some inspiriation: "_do or do not; there is no try_". Go get 'em tiger!`
-    );
+    bot.reply(message, message.fulfillment.speech);
   });
 });
 
@@ -230,6 +230,16 @@ controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, messag
 
 // Easter eggs
 controller.hears('In a galaxy far far away', 'direct_message,direct_mention,mention', (bot, message) => {
+  bot.api.reactions.add({
+    channel: message.channel,
+    name: 'r2d2',
+    timestamp: message.ts,
+  }, (err, res) => {
+    if (err) {
+      bot.botkit.log('Failed to add emoji reaction :(', err);
+    }
+  });
+
   bot.reply(message, `
     Luke Skywalker has vanished. In his absence, the sinister FIRST ORDER has risen from the ashes of the Empire and will not rest until Skywalker, the last Jedi, has been destroyed. With the support of the REPUBLIC, General Leia Organa leads a brave RESISTANCE. She is desperate to find her brother Luke and gain his help in restoring peace and justice to the galaxy. Leia has sent her most daring pilot on a secret mission to Jakku, where an old ally has discovered a clue to Luke's whereabouts....
   `);
