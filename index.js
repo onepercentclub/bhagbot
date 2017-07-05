@@ -13,6 +13,17 @@ if (!process.env.TOKEN) {
 // Set up the scheduled jobs
 jobs(bot, controller, influx);
 
+// Teams
+const teams = [
+  'business',
+  'communications',
+  'customer success',
+  'finance',
+  'office',
+  'people',
+  'product',
+];
+
 ///////////////////
 // Conversations //
 ///////////////////
@@ -84,16 +95,17 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
 
 // My team is ...
 controller.hears(['Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
-    if (!user) {
-      user = {
-        id: message.user,
-      };
+  controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
+    const team = message.entities.team.toLowerCase();
+
+    if (teams.indexOf(team) === -1) {
+      bot.reply(message, `Your team should be one of ${teams.join(', ')}`);
+    } else {
+      user.team = team;
+      controller.storage.users.save(user, (err, id) => {
+        bot.reply(message, message.fulfillment.speech);
+      });
     }
-    user.team = message.entities.team;
-    controller.storage.users.save(user, (err, id) => {
-      bot.reply(message, message.fulfillment.speech);
-    });
   });
 });
 
@@ -102,22 +114,7 @@ controller.hears(['Change Team'], 'direct_message,direct_mention,mention', apiai
   bot.reply(message, message.fulfillment.speech);
 });
 
-controller.hears(['set.team'], '', apiai.actions, (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
-    if (!user) {
-      user = {
-        id: message.user,
-      };
-    }
-    user.team = message.entities.team;
-    controller.storage.users.save(user, (err, id) => {
-      bot.reply(message, message.fulfillment.speech);
-    });
-  });
-});
-
 // Happiness score
-
 controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   const team = message.entities.team;
 
@@ -151,7 +148,6 @@ controller.hears(['what is my happiness score'], 'direct_message,direct_mention,
 });
 
 // Personal resolution score
-
 controller.hears(['yes, i have obtained my personal resolution score'], 'direct_message,direct_mention,mention', (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
     bot.reply(message,
@@ -190,7 +186,6 @@ controller.hears(['what is my happiness score'], 'direct_message,direct_mention,
 });
 
 // Engagement number
-
 controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
   influx.query(`
     select sum(engagement_number) from saas
@@ -201,7 +196,6 @@ controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mentio
 });
 
 // Team
-
 controller.hears(['what is my team'], 'direct_message,direct_mention,mention', (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
     bot.reply(message, `Your team is ${user.team}`);
@@ -209,7 +203,6 @@ controller.hears(['what is my team'], 'direct_message,direct_mention,mention', (
 });
 
 // Cryptocurrencies
-
 controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_mention,mention', (bot, message) => {
   const match = message.match[1] === 'ether' ? 'ethereum' : message.match[1];
   fetch(`https://api.coinmarketcap.com/v1/ticker/${match}/?convert=EUR`)
@@ -220,7 +213,6 @@ controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_me
 });
 
 // Help
-
 controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.reply(message, `
     Howdy stranger, let me tell you the amazing stuff that I can do! Use the commands in a private message to me, or use it in a channel like so '@bhag [COMMAND]'
@@ -237,7 +229,6 @@ controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, messag
 });
 
 // Easter eggs
-
 controller.hears('In a galaxy far far away', 'direct_message,direct_mention,mention', (bot, message) => {
   bot.reply(message, `
     Luke Skywalker has vanished. In his absence, the sinister FIRST ORDER has risen from the ashes of the Empire and will not rest until Skywalker, the last Jedi, has been destroyed. With the support of the REPUBLIC, General Leia Organa leads a brave RESISTANCE. She is desperate to find her brother Luke and gain his help in restoring peace and justice to the galaxy. Leia has sent her most daring pilot on a secret mission to Jakku, where an old ally has discovered a clue to Luke's whereabouts....
