@@ -4,7 +4,13 @@ const schedule = require('node-schedule');
 const { apiai, bot, controller } = require('./bot');
 
 const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
-const teams = ['product', 'sales', 'communications', 'customer success', 'operations'];
+const teams = [
+  'product',
+  'sales',
+  'communications',
+  'customer success',
+  'operations',
+];
 
 const askQuestions = (convo, message, user) => {
   function askForHappiness(convo) {
@@ -80,7 +86,7 @@ const askQuestions = (convo, message, user) => {
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
   const friday = { dayOfWeek: 3, hour: 9, minute: 0 };
-  schedule.scheduleJob({ second: 1 }, () => {
+  schedule.scheduleJob(friday, () => {
     bot.api.channels.info({ channel: crewChannel }, (err,response) => {
       response.channel.members.map(userId => {
         controller.storage.users.get(userId, (err, user) => {
