@@ -13,10 +13,13 @@ if (!process.env.TOKEN) {
 // Set up the scheduled jobs
 jobs(bot, controller, influx);
 
-// Conversations
+///////////////////
+// Conversations //
+///////////////////
 
 // Hi, Howdy, Hello, etc.
 controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+  // Add the bhag emoji as reaction to the message of the sender
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,

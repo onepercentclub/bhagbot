@@ -5,11 +5,13 @@ const { apiai, bot, controller } = require('./bot');
 
 const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for crew channel, C4CF2GA91 for team-engineering
 const teams = [
-  'product',
-  'sales',
+  'business'
   'communications',
   'customer success',
-  'operations',
+  'finance',
+  'office',
+  'people',
+  'product',
 ];
 
 const askQuestions = (convo, message, user) => {
@@ -85,15 +87,14 @@ const askQuestions = (convo, message, user) => {
 
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
-  const friday = { dayOfWeek: 3, hour: 9, minute: 0 };
-  schedule.scheduleJob(friday, () => {
+  const friday = { dayOfWeek: 5, hour: 9, minute: 0 };
+  schedule.scheduleJob({ second: 0 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err,response) => {
       response.channel.members.map(userId => {
-        controller.storage.users.get(userId, (err, user) => {
-          bot.startPrivateConversation({ user: userId }, (err, convo) => {
-            askQuestions(convo, { channel: userId }, user);
-          });
-        });
+        bot.reply({ channel: userId }, 'How are you feeling this week?');
+        // bot.startPrivateConversation({ user: userId }, (err, convo) => {
+        //   askQuestions(convo, { channel: userId }, user);
+        // });
       });
     });
   });
