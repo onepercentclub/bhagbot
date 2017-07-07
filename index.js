@@ -201,12 +201,12 @@ controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, messag
   bot.reply(message, `
     Hey you! Let me tell you the amazing stuff that I can do! Say it in a private message, or use it in a channel like so '@bhag [COMMAND]'
 
-    * Questions *
+    *Questions*
     - What is the engagement number?
     - What is the happiness score (of the X team)?
     - What is my team?
 
-    * Actions *
+    *Actions*
     - Hi, Howdy or Hello _submit your happiness score and whether or not you've obtained your PSR_
     - I want to change teams _that says it all right?_
     - I did not obtain my PSR _if you've accidentally said that you did_
