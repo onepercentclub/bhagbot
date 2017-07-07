@@ -18,9 +18,7 @@ const teams = [
   'business',
   'communications',
   'customer success',
-  'finance',
-  'office',
-  'people',
+  'operations',
   'product',
 ];
 
