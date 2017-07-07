@@ -21,7 +21,7 @@ module.exports = (bot, controller, influx) => {
 
   // Sync with Influx on Sunday
   const sunday = { dayOfWeek: 0, hour: 0, minute: 0 };
-  schedule.scheduleJob({ dayOfWeek: 5, hour: 14, minute: 25 }, () => {
+  schedule.scheduleJob({ dayOfWeek: 5, hour: 14, minute: 33 }, () => {
     const week = currentWeekNumber();
 
     const timestamp = new Date; // get current date
