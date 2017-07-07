@@ -5,7 +5,7 @@ const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for cr
 
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
-  const friday = { dayOfWeek: 5, hour: 11, minute: 0 };
+  const friday = { dayOfWeek: 5, hour: 15, minute: 0 };
   schedule.scheduleJob({ dayOfWeek: 5, hour: 11, minute: 30 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err, { channel }) => {
       channel.members.map(userId => {
@@ -21,7 +21,7 @@ module.exports = (bot, controller, influx) => {
 
   // Sync with Influx on Sunday
   const sunday = { dayOfWeek: 0, hour: 0, minute: 0 };
-  schedule.scheduleJob({ dayOfWeek: 5, hour: 14, minute: 33 }, () => {
+  schedule.scheduleJob(sunday, () => {
     const week = currentWeekNumber();
 
     const timestamp = new Date; // get current date
