@@ -1,6 +1,6 @@
 const Influx = require('influx');
 
-const database = process.env.ENVIRONMENT === 'production' ? '' : 'platform_v2_staging';
+const database = process.env.NODE_ENV === 'production' ? 'platform_v2_production' : 'platform_v2_staging';
 
 module.exports = new Influx.InfluxDB({
   database,
@@ -20,14 +20,13 @@ module.exports = new Influx.InfluxDB({
       'type',
     ],
   },
-  // {
-  //     measurement: 'resolution_score',
-  //     fields: {
-  //       success: Influx.FieldType.BOOLEAN,
-  //     },
-  //     tags: [
-  //       'username',
-  //     ],
-  //   }
-  ],
+  {
+    measurement: 'resolution_score',
+    fields: {
+      success: Influx.FieldType.BOOLEAN,
+    },
+    tags: [
+      'username',
+    ],
+  }],
 });

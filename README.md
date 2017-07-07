@@ -12,6 +12,6 @@
 ~ yarn
 ```
 
-If you want to run in production, also run `EXPORT ENVIRONMENT=production`
+If you want to run in production, also run `EXPORT NODE_ENV=production`
 
 And then run `node .` in the project folder.
