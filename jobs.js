@@ -21,7 +21,7 @@ module.exports = (bot, controller, influx) => {
 
   // Sync with Influx on Sunday
   const sunday = { dayOfWeek: 0, hour: 0, minute: 0 };
-  schedule.scheduleJob(sunday, () => {
+  schedule.scheduleJob({ dayOfWeek: 5, hour: 14, minute: 25 }, () => {
     const week = currentWeekNumber();
 
     const timestamp = new Date; // get current date
@@ -34,38 +34,38 @@ module.exports = (bot, controller, influx) => {
     timestamp.setHours(23);
     timestamp.setDate(last);
 
-    controller.storage.users.all((err, users) => {
-      const points = users.filter((user) => (user.happiness && Boolean(user.happiness[week]))).map((user) => ({
-        measurement: 'ratings',
-        fields: {
-          score: user.happiness[week],
-        },
-        tags: {
-          department: user.team,
-          username: user.id,
-          type: 'happiness',
-        },
-        timestamp,
-      }));
+    controller.storage.users.all().then((users) => {
+      if (users) {
+        const points = users.filter((user) => (user.happiness && Boolean(user.happiness[week]))).map((user) => ({
+          measurement: 'ratings',
+          fields: {
+            score: user.happiness[week],
+          },
+          tags: {
+            department: user.team,
+            username: user.id,
+            type: 'happiness',
+          },
+          timestamp,
+        })).concat(users.map((user) => ({
+          measurement: 'resolution_score',
+          fields: {
+            success: Boolean(user.psrObtained),
+          },
+          tags: {
+            department: user.team,
+            username: user.id,
+            type: 'psr',
+          },
+          timestamp: new Date(2017, 8, 30).getTime(),
+        })));
 
-      points.concat(users.map((user) => ({
-        measurement: 'resolution_score',
-        fields: {
-          success: Boolean(user.psrObtained),
-        },
-        tags: {
-          department: user.team,
-          username: user.id,
-          type: 'happiness',
-        },
-        timestamp,
-      })));
-
-      influx.writePoints(points).then((result) => {
-        console.log(`Week ${week} is written to influx.`);
-      }).catch((err) => {
-        console.log(`influx err: ${err}`);
-      });
+        influx.writePoints(points).then((result) => {
+          console.log(`Week ${week} is written to influx.`);
+        }).catch((err) => {
+          console.log(`influx err: ${err}`);
+        });
+      }
     });
   });
 }

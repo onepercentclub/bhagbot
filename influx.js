@@ -26,7 +26,9 @@ module.exports = new Influx.InfluxDB({
       success: Influx.FieldType.BOOLEAN,
     },
     tags: [
+      'department',
       'username',
+      'type',
     ],
   }],
 });
