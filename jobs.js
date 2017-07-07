@@ -6,7 +6,7 @@ const crewChannel = 'C63PW9UGM'; // C63PW9UGM for test channel, C02A2JZQY for cr
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
   const friday = { dayOfWeek: 5, hour: 11, minute: 0 };
-  schedule.scheduleJob({ dayOfWeek: 5, minute: 25 }, () => {
+  schedule.scheduleJob({ dayOfWeek: 5, hour: 11, minute: 15 }, () => {
     bot.api.channels.info({ channel: crewChannel }, (err, { channel }) => {
       channel.members.map(userId => {
         bot.api.users.info({ user: userId }, (err, { user }) => {
@@ -48,10 +48,23 @@ module.exports = (bot, controller, influx) => {
         timestamp,
       }));
 
+      points.concat(users.map((user) => ({
+        measurement: 'resolution_score',
+        fields: {
+          success: Boolean(user.psrObtained),
+        },
+        tags: {
+          department: user.team,
+          username: user.id,
+          type: 'happiness',
+        },
+        timestamp,
+      })));
+
       influx.writePoints(points).then((result) => {
-        // Written to influx
+        console.log(`Week ${week} is written to influx.`);
       }).catch((err) => {
-        console.log('influx err: ' + err);
+        console.log(`influx err: ${err}`);
       });
     });
   });
