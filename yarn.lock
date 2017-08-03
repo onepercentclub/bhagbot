@@ -466,9 +466,9 @@ botbuilder@^3.7.0:
     sprintf-js "^1.0.3"
     url-join "^1.1.0"
 
-botkit-middleware-apiai@^0.1.1:
+"botkit-middleware-apiai@https://github.com/simpixelated/botkit-middleware-apiai.git#omit-slack-id":
   version "0.1.1"
-  resolved "https://registry.yarnpkg.com/botkit-middleware-apiai/-/botkit-middleware-apiai-0.1.1.tgz#c61afe7d826c8448faf5c83d2853446c9559ace6"
+  resolved "https://github.com/simpixelated/botkit-middleware-apiai.git#89895217fbb43d2201c6caede2d390ef8cc0b5bb"
   dependencies:
     apiai "^2.0.5"
     node-uuid "^1.4.7"

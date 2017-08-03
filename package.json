@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "botkit": "^0.5.6",
-    "botkit-middleware-apiai": "^0.1.1",
+    "botkit-middleware-apiai": "https://github.com/simpixelated/botkit-middleware-apiai.git#omit-slack-id",
     "botkit-storage-mongo": "^1.0.7",
     "current-week-number": "^1.0.7",
     "influx": "^5.0.7",
