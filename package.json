@@ -10,11 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "botkit": "^0.5.4",
-    "botkit-middleware-apiai": "https://github.com/simpixelated/botkit-middleware-apiai.git#omit-slack-id",
-    "botkit-storage-mongo": "^1.0.6",
+    "botkit": "^0.5.6",
+    "botkit-middleware-apiai": "^0.1.1",
+    "botkit-storage-mongo": "^1.0.7",
     "current-week-number": "^1.0.7",
-    "influx": "next",
+    "influx": "^5.0.7",
     "node-fetch": "^1.7.1",
     "node-schedule": "^1.2.3",
     "nodemon": "^1.11.0"
