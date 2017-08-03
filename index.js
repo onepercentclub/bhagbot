@@ -59,13 +59,7 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
   if (!score || (score < 1) || (score > 10)) {
     bot.reply(message, 'Please submit a number between 1 and 10.');
   } else {
-    controller.storage.users.get(message.user, (err, user) => {
-      if (!user) {
-        user = {
-          id: message.user,
-        };
-      }
-
+    controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
       const week = currentWeekNumber();
 
       if (!user.happiness) {
@@ -132,7 +126,7 @@ controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mentio
 
 // Personal resolution score
 controller.hears(['PSR Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
+  controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = true;
     controller.storage.users.save(user, (err, id) => {
       bot.reply(message, message.fulfillment.speech);
@@ -141,7 +135,7 @@ controller.hears(['PSR Obtained'], 'direct_message,direct_mention,mention', apia
 });
 
 controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
+  controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = false;
     controller.storage.users.save(user, (err, id) => {
       bot.reply(message, message.fulfillment.speech);
@@ -150,7 +144,7 @@ controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention,mention', 
 });
 
 controller.hears(['PSR Obtained Revert'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
-  controller.storage.users.get(message.user, (err, user) => {
+  controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = false;
     controller.storage.users.save(user, (err, id) => {
       bot.reply(message, message.fulfillment.speech);
