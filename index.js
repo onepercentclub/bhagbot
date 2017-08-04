@@ -31,12 +31,6 @@ const teams = [
 //                                                                               -> PSR Not Obtained
 //                                                                               -> PSR Obtained
 
-
-// Fallback
-controller.hears(['.*'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
-  bot.reply(message, message.fulfillment.speech);
-});
-
 // Hi, Howdy, Hello, etc.
 controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   // Add the bhag emoji as reaction to the message of the sender
@@ -238,4 +232,10 @@ controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_me
     .then((json) => {
       bot.reply(message, `€${json[0].price_eur} (${json[0].percent_change_24h}%)`);
     });
+});
+
+
+// Fallback
+controller.hears('.*', 'direct_message,direct_mention', (bot, message) => {
+  bot.reply(message, message.fulfillment.speech);
 });
