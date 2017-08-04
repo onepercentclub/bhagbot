@@ -31,8 +31,14 @@ const teams = [
 //                                                                               -> PSR Not Obtained
 //                                                                               -> PSR Obtained
 
+
+// Fallback
+controller.hears(['.*'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
+  bot.reply(message, message.fulfillment.speech);
+});
+
 // Hi, Howdy, Hello, etc.
-controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   // Add the bhag emoji as reaction to the message of the sender
   bot.api.reactions.add({
     channel: message.channel,
@@ -48,12 +54,12 @@ controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention,ment
 });
 
 // Fine and you, I'm doing great, etc.
-controller.hears(['Welcome Response Intent'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Welcome Response Intent'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   bot.reply(message, message.fulfillment.speech);
 });
 
 // My score is ...
-controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   const score = message.entities.number;
 
   if (!score || (score < 1) || (score > 10)) {
@@ -92,7 +98,7 @@ controller.hears(['Happiness Score Personal'], 'direct_message,direct_mention,me
 });
 
 // My team is ...
-controller.hears(['Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Team'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     const team = message.entities.team.toLowerCase();
 
@@ -108,12 +114,12 @@ controller.hears(['Team'], 'direct_message,direct_mention,mention', apiai.hears,
 });
 
 // I want to change team
-controller.hears(['Change Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Change Team'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   bot.reply(message, message.fulfillment.speech);
 });
 
 // Happiness score
-controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Happiness Score Team'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   const team = message.entities.team;
 
   influx.query(`
@@ -125,7 +131,7 @@ controller.hears(['Happiness Score Team'], 'direct_message,direct_mention,mentio
 });
 
 // Personal resolution score
-controller.hears(['PSR Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['PSR Obtained'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = true;
     controller.storage.users.save(user, (err, id) => {
@@ -134,7 +140,7 @@ controller.hears(['PSR Obtained'], 'direct_message,direct_mention,mention', apia
   });
 });
 
-controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = false;
     controller.storage.users.save(user, (err, id) => {
@@ -143,7 +149,7 @@ controller.hears(['PSR Not Obtained'], 'direct_message,direct_mention,mention', 
   });
 });
 
-controller.hears(['PSR Obtained Revert'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['PSR Obtained Revert'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   controller.storage.users.get(message.user, (err, user = { id: message.user }) => {
     user.psrObtained = false;
     controller.storage.users.save(user, (err, id) => {
@@ -152,7 +158,7 @@ controller.hears(['PSR Obtained Revert'], 'direct_message,direct_mention,mention
   });
 });
 
-controller.hears(['what is my happiness score'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['what is my happiness score'], 'direct_message,direct_mention', (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
     const week = currentWeekNumber();
     const happiness = user.happiness[week];
@@ -174,7 +180,7 @@ controller.hears(['what is my happiness score'], 'direct_message,direct_mention,
 });
 
 // Engagement number
-controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mention,mention', apiai.hears, (bot, message) => {
+controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
   influx.query(`
     select sum(engagement_number) from saas
     where type='engagement_number_aggregate'
@@ -184,14 +190,14 @@ controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mentio
 });
 
 // Team
-controller.hears(['what is my team'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['what is my team'], 'direct_message,direct_mention', (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
     bot.reply(message, `Your team is ${user.team}`);
   });
 });
 
 // Help
-controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['help'], 'direct_message,direct_mention', (bot, message) => {
   bot.reply(message, `
     Hey you! Let me tell you the amazing stuff that I can do! Say it in a private message, or use it in a channel like so '@bhag [COMMAND]'
 
@@ -208,7 +214,7 @@ controller.hears(['help'], 'direct_message,direct_mention,mention', (bot, messag
 });
 
 // Easter eggs
-controller.hears('In a galaxy far far away', 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears('In a galaxy far far away', 'direct_message,direct_mention', (bot, message) => {
   bot.api.reactions.add({
     channel: message.channel,
     name: 'r2d2',
@@ -225,7 +231,7 @@ controller.hears('In a galaxy far far away', 'direct_message,direct_mention,ment
 });
 
 // Cryptocurrencies
-controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['(bitcoin|dogecoin|ether|stratis)'], 'direct_message,direct_mention', (bot, message) => {
   const match = message.match[1] === 'ether' ? 'ethereum' : message.match[1];
   fetch(`https://api.coinmarketcap.com/v1/ticker/${match}/?convert=EUR`)
     .then((result) => result.json())

@@ -9,6 +9,8 @@ const apiai = require('botkit-middleware-apiai')({
 
 const controller = botkit.slackbot({
   debug: true,
+  retry: 5,
+  send_via_rtm: true,
   storage: mongoStorage,
 });
 
