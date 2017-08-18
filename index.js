@@ -27,9 +27,9 @@ const teams = [
 ///////////////////
 
 // Basic flow:
-// Default Welcome Intent -> Welcome Response Intent -> Happiness Score Personal -> Team
-//                                                                               -> PSR Not Obtained
-//                                                                               -> PSR Obtained
+// Default Welcome Intent -> Happiness Score Personal -> Team
+//                                                    -> PSR Not Obtained
+//                                                    -> PSR Obtained
 
 // Hi, Howdy, Hello, etc.
 controller.hears(['Default Welcome Intent'], 'direct_message,direct_mention', apiai.hears, (bot, message) => {
@@ -184,7 +184,7 @@ controller.hears(['Engagement Number Aggregated'], 'direct_message,direct_mentio
 });
 
 // Team
-controller.hears(['what is my team'], 'direct_message,direct_mention', (bot, message) => {
+controller.hears(['what\'s my team', 'what is my team'], 'direct_message,direct_mention', (bot, message) => {
   controller.storage.users.get(message.user, (err, user) => {
     bot.reply(message, `Your team is ${user.team}`);
   });
