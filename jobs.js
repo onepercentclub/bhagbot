@@ -5,7 +5,7 @@ const crewChannel = 'C02A2JZQY'; // C63PW9UGM for test channel, C02A2JZQY for cr
 
 module.exports = (bot, controller, influx) => {
   // Ask question on Friday
-  const friday = { dayOfWeek: 5, hour: 14, minute: 00 };
+  const friday = { dayOfWeek: 5, hour: 13, minute: 0 };
   schedule.scheduleJob(friday, () => {
     console.log('there you go')
     bot.api.channels.info({ channel: crewChannel }, (err, { channel }) => {
@@ -21,7 +21,7 @@ module.exports = (bot, controller, influx) => {
   });
 
   // Sync with Influx on Sunday
-  const sunday = { dayOfWeek: 0, hour: 0, minute: 0 };
+  const sunday = { dayOfWeek: 5, hour: 16, minute: 0 };
   schedule.scheduleJob(sunday, () => {
     const week = currentWeekNumber();
 
