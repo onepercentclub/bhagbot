@@ -11,7 +11,7 @@ if (!process.env.TOKEN) {
 }
 
 // Set up the scheduled jobs
-jobs(bot, controller, influx);
+// jobs(bot, controller, influx);
 
 // Teams
 const teams = [
